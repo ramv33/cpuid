@@ -1,7 +1,7 @@
 	.text
 	.globl	has_cpuid
 	.type	has_cpuid, @function
-# bool has_cpuid(void)
+# int has_cpuid(void)
 has_cpuid:
 	pushfq
 	pop	%rax
@@ -17,7 +17,7 @@ has_cpuid:
 	# check if it was modified
 	xor	%rcx, %rax
 	# bit 21 is 1 if it was toggled successfully
-	shr	$20, %rax
+	shr	$21, %rax
 	ret
 
 	.globl	cpuid

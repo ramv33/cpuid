@@ -4,27 +4,6 @@
 
 #include "cpuid.h"
 
-void get_cpu_string(char pstr[13])
-{
-	struct cpuid_regs regs;
-
-	regs.eax = 0;
-	cpuid(&regs);
-
-	pstr[0] = regs.ebx & 0xff;
-	pstr[1] = (regs.ebx >> 8) & 0xff;
-	pstr[2] = (regs.ebx >> 16) & 0xff;
-	pstr[3] = (regs.ebx >> 24) & 0xff;
-	pstr[4] = regs.edx & 0xff;
-	pstr[5] = (regs.edx >> 8) & 0xff;
-	pstr[6] = (regs.edx >> 16) & 0xff;
-	pstr[7] = (regs.edx >> 24) & 0xff;
-	pstr[8] = regs.ecx & 0xff;
-	pstr[9] = (regs.ecx >> 8) & 0xff;
-	pstr[10] = (regs.ecx >> 16) & 0xff;
-	pstr[11] = (regs.ecx >> 24) & 0xff;
-	pstr[12] = '\0';
-}
 
 void print_cpu_string(void)
 {
@@ -33,41 +12,59 @@ void print_cpu_string(void)
 	printf("Processor Identifier String: %s\n", pstr);
 }
 
-void c01(void)
+void c01(const char *feature_ecx[], const char *feature_edx[])
 {
 	struct cpuid_regs regs;
 
 	regs.eax = 1;
+	regs.ebx = regs.ecx = regs.edx = 0;
 	cpuid(&regs);
 
-	printf("Stepping ID: 0x%04x\n", regs.eax & 0xf);
+	puts("CPUID.EAX=0x1");
+	puts("=============");
+	printf("\tStepping ID: 0x%04x\n", regs.eax & 0xf);
 	regs.eax >>= 4;
-	printf("Model: 0x%04x\n", regs.eax & 0xf);
+	printf("\tModel: 0x%04x\n", regs.eax & 0xf);
 	regs.eax >>= 4;
-	printf("Family ID: 0x%04x\n", regs.eax & 0xf);
+	printf("\tFamily ID: 0x%04x\n", regs.eax & 0xf);
 	regs.eax >>= 4;
-	printf("Processor Type: 0x%02x\n", regs.eax & 0x3);
+	printf("\tProcessor Type: 0x%02x\n", regs.eax & 0x3);
 	regs.eax >>= 2;
 	regs.eax >>= 2; // reserved bits
-	printf("Extended Model ID: 0x%04x\n", regs.eax & 0xf);
+	printf("\tExtended Model ID: 0x%04x\n", regs.eax & 0xf);
 	regs.eax >>= 4;
-	printf("Extended Family ID: 0x%04x\n", regs.eax & 0xff);
+	printf("\tExtended Family ID: 0x%04x\n", regs.eax & 0xff);
 
-	printf("Brand Index: 0x%08x\n", regs.ebx & 0xff);
+	printf("\tBrand Index: 0x%08x\n", regs.ebx & 0xff);
 	regs.ebx >>= 8;
-	printf("CLFLUSH Line Size: %d\n", regs.ebx & 0xff);
-	printf("Cache Line Size: %d\n", (regs.ebx & 0xff) * 8);
+	printf("\tCLFLUSH Line Size: %d\n", regs.ebx & 0xff);
+	printf("\tCache Line Size: %d\n", (regs.ebx & 0xff) * 8);
 	regs.ebx >>= 8;
 	if (regs.edx & (1 << 28))
-		printf("Max number of addressable IDs for logical processors: %d\n", regs.ebx & 0xff);
+		printf("\tMax number of addressable IDs for logical processors: %d\n", regs.ebx & 0xff);
 	regs.ebx >>= 8;
-	printf("Initial APIC ID: 0x%08x\n", regs.ebx & 0xff);
+	printf("\tInitial APIC ID: 0x%08x\n", regs.ebx & 0xff);
 
-	puts("\n--- Features in ECX ---");
-	// bit 31 is always 0 and not used
-	for (int i = 0; i < 31; i++)
-		printf("%s: %c\n", g_features_ecx[i], regs.ecx & (1 << i) ? 'Y' : 'N');
+	puts("\n\t--- Features in ECX ---");
+	dump_features(regs.ecx, feature_ecx);
+	puts("\n\t--- Features in EDX ---");
+	dump_features(regs.edx, feature_edx);
+}
 
+void c02()
+{
+	struct cpuid_regs regs;
+
+	regs.eax = 2;
+	regs.ebx = regs.ecx = regs.edx = 0;
+
+	puts("CPUID.EAX=0x2");
+	puts("=============");
+
+	// AL is always 0x01
+	// If msb of register is 0, it contains valid info; otherwise it is reserved.
+	// If valid, each byte of the register contains 1 byte descriptors.
+	// The descriptors are described in Table-3.21
 
 }
 
@@ -82,7 +79,7 @@ int main(void)
 
 	print_cpu_string();
 	puts("---------------\n");
-	c01();
+	c01(g_feat_ecx_intel_01, g_feat_edx_intel_01);
 
 	return 0;
 }

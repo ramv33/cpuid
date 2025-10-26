@@ -1,77 +1,53 @@
 #ifndef CPUID_H
+#define CPUID_H
 
 #include <stdint.h>
 
-// Feature information - Table 3-19 Vol 2
-#define ECX_BIT_SSE3		0
-#define ECX_BIT_PCLMULQDQ	1
-#define ECX_BIT_DTES64		2
-#define ECX_BIT_MONITOR		3
-#define ECX_BIT_DS_CPL		4
-#define ECX_BIT_VMX		5
-#define ECX_BIT_SMX		6
-#define ECX_BIT_EIST		7
-#define ECX_BIT_TM2		8
-#define ECX_BIT_SSSE3		9
-#define ECX_BIT_CNXT_ID		10
-#define ECX_BIT_SDBG		11
-#define ECX_BIT_FMA		12
-#define ECX_BIT_CMPXCHG16B	13
-#define ECX_BIT_xTPR_UPD_CTRL	14
-#define ECX_BIT_PDCM		15
-#define ECX_BIT_RESERVED	16
-#define ECX_BIT_PCID		17
-#define ECX_BIT_DCA		18
-#define ECX_BIT_SSE4_1		19
-#define ECX_BIT_SSE4_2		20
-#define ECX_BIT_x2APIC		21
-#define ECX_BIT_MOVBE		22
-#define ECX_BIT_POPCNT		23
-#define ECX_BIT_TSC_DEADLINE	24
-#define ECX_BIT_AESNI		25
-#define ECX_BIT_XSAVE		26
-#define ECX_BIT_OSXSAVE		27
-#define ECX_BIT_AVX		28
-#define ECX_BIT_F16C		29
-#define ECX_BIT_RDRAND		30
-#define ECX_BIT_UNUSED		31
-
 #define BIT(x)	(1 << (x))
 
-const char *g_features_ecx[] = {
-	[ECX_BIT_SSE3] = "SSE3",
-	[ECX_BIT_PCLMULQDQ] = "PCLMULQDQ",
-	[ECX_BIT_DTES64] = "64-bit DS Area",
-	[ECX_BIT_MONITOR] = "MONITOR/MWAIT",
-	[ECX_BIT_DS_CPL] = "CPL Qualified Debug Store",
-	[ECX_BIT_VMX] = "VM extensions",
-	[ECX_BIT_SMX] = "Safer Mode Extensions",
-	[ECX_BIT_EIST] = "Enhanced Intel SpeedStep",
-	[ECX_BIT_TM2] = "Thermal Monitor 2",
-	[ECX_BIT_SSSE3] = "SSSE3",
-	[ECX_BIT_CNXT_ID] = "L1 Context ID",
-	[ECX_BIT_SDBG] = "IA32_DEBUG_INTERFACE MSR for Silicon Debug",
-	[ECX_BIT_FMA] = "FMA",
-	[ECX_BIT_CMPXCHG16B] = "CMPXCHG16B",
-	[ECX_BIT_xTPR_UPD_CTRL] = "xTPR Update Control",
-	[ECX_BIT_PDCM] = "PerfMon and Debug Capability",
-	[ECX_BIT_RESERVED] = "RESERVED",
-	[ECX_BIT_PCID] = "Process-context Identifiers",
-	[ECX_BIT_DCA] = "DCA (Prefetch data from a mmaped device)",
-	[ECX_BIT_SSE4_1] = "SSE4_1",
-	[ECX_BIT_SSE4_2] = "SSE4_2",
-	[ECX_BIT_x2APIC] = "x2APIC",
-	[ECX_BIT_MOVBE] = "MOVBE",
-	[ECX_BIT_POPCNT] = "POPCNT",
-	[ECX_BIT_TSC_DEADLINE] = "TSC_DEADLINE",
-	[ECX_BIT_AESNI] = "AESNI",
-	[ECX_BIT_XSAVE] = "XSAVE",
-	[ECX_BIT_OSXSAVE] = "OSXSAVE",
-	[ECX_BIT_AVX] = "AVX",
-	[ECX_BIT_F16C] = "F16C",
-	[ECX_BIT_RDRAND] = "RDRAND",
+static const char *g_feat_ecx_intel_01[] = {
+	[0] = "SSE3", [1] = "PCLMULQDQ", [2] = "64-bit DS Area", [3] = "MONITOR/MWAIT",
+	[4] = "CPL Qualified Debug Store", [5] = "VM extensions", [6] = "Safer Mode Extensions", [7] = "Enhanced Intel SpeedStep",
+	[8] = "Thermal Monitor 2", [9] = "SSSE3", [10] = "L1 Context ID", [11] = "IA32_DEBUG_INTERFACE MSR for Silicon Debug",
+	[12] = "FMA", [13] = "CMPXCHG16B", [14] = "xTPR Update Control", [15] = "PerfMon and Debug Capability",
+	[16] = "RESERVED", [17] = "Process-context Identifiers", [18] = "DCA (Prefetch data from a mmaped device)", [19] = "SSE4_1",
+	[20] = "SSE4_2", [21] = "x2APIC", [22] = "MOVBE", [23] = "POPCNT",
+	[24] = "TSC_DEADLINE", [25] = "AESNI", [26] = "XSAVE", [27] = "OSXSAVE",
+	[28] = "AVX", [29] = "F16C", [30] = "RDRAND", [31] = "UNUSED"
 };
 
+static const char *g_feat_edx_intel_01[] = {
+	[0] = "FPU", [1] = "VME", [2] = "Debugging Extensions", [3] = "Page Size Extension",
+	[4] = "RDTSC", [5] = "MSR", [6] = "PAE", [7] = "MCE",
+	[8] = "CMPXCHG8B", [9] = "APIC", [10] = "Reserved", [11] = "SYSENTER/SYSEXIT",
+	[12] = "MTRR", [13] = "Page Global Bit", [14] = "MCA", [15] = "CMOV",
+	[16] = "Page Attr Table", [17] = "36-bit PSE", [18] = "Processor Serial No.", [19] = "CLFLUSH",
+	[20] = "Reserved", [21] = "Debug Store", [22] = "ACPI", [23] = "MMX",
+	[24] = "FXSAVE/FXRSTOR", [25] = "SSE", [26] = "SSE2", [27] = "Self Snoop",
+	[28] = "HTT", [29] = "Thermal Monitor", [30] = "Reserved", [31] = "Pending Break Enable"
+};
+
+static const char *g_feat_ecx_amd_01[] = {
+	[0] = "SSE3", [1] = "PCLMULQDQ", [2] = "64-bit DS Area", [3] = "MONITOR/MWAIT",
+	[4] = "CPL Qualified Debug Store", [5] = "VM extensions", [6] = "Safer Mode Extensions", [7] = "Enhanced Intel SpeedStep",
+	[8] = "Thermal Monitor 2", [9] = "SSSE3", [10] = "L1 Context ID", [11] = "IA32_DEBUG_INTERFACE MSR for Silicon Debug",
+	[12] = "FMA", [13] = "CMPXCHG16B", [14] = "xTPR Update Control", [15] = "PerfMon and Debug Capability",
+	[16] = "RESERVED", [17] = "Process-context Identifiers", [18] = "DCA (Prefetch data from a mmaped device)", [19] = "SSE4_1",
+	[20] = "SSE4_2", [21] = "x2APIC", [22] = "MOVBE", [23] = "POPCNT",
+	[24] = "TSC_DEADLINE", [25] = "AESNI", [26] = "XSAVE", [27] = "OSXSAVE",
+	[28] = "AVX", [29] = "F16C", [30] = "RDRAND", [31] = "UNUSED"
+};
+
+static const char *g_feat_edx_amd_01[] = {
+	[0] = "FPU", [1] = "VME", [2] = "Debugging Extensions", [3] = "Page Size Extension",
+	[4] = "RDTSC", [5] = "MSR", [6] = "PAE", [7] = "MCE",
+	[8] = "CMPXCHG8B", [9] = "APIC", [10] = "Reserved", [11] = "SYSENTER/SYSEXIT",
+	[12] = "MTRR", [13] = "Page Global Bit", [14] = "MCA", [15] = "CMOV",
+	[16] = "Page Attr Table", [17] = "36-bit PSE", [18] = "Processor Serial No.", [19] = "CLFLUSH",
+	[20] = "Reserved", [21] = "Debug Store", [22] = "ACPI", [23] = "MMX",
+	[24] = "FXSAVE/FXRSTOR", [25] = "SSE", [26] = "SSE2", [27] = "Self Snoop",
+	[28] = "HTT", [29] = "Thermal Monitor", [30] = "Reserved", [31] = "Pending Break Enable"
+};
 
 struct cpuid_regs {
 	int32_t	eax;
@@ -80,7 +56,9 @@ struct cpuid_regs {
 	int32_t	edx;
 };
 
+int has_cpuid(void);
 void cpuid(struct cpuid_regs* regs);
-bool has_cpuid(void);
+void dump_features(int32_t reg, const char *feat_array[]);
+void get_cpu_string(char pstr[13]);
 
 #endif
