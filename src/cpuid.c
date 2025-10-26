@@ -2,26 +2,21 @@
 
 bool has_cpuid(void)
 {
-	int has;
+	bool has;
 
 	asm volatile(
-		"xorl	%%eax, %%eax\n\t"
-		"xorl	%%ecx, %%ecx\n\t"
-		"movl	$1, %%ebx\n\t"
-		"pushfq\n\t"
+		"pushf\n\t"
+		"pop	%%rax\n\t"
+		"mov	%%rax, %%rcx\n\t"
 		// set CF = bit 21 and complement bit 21
-		"btcq	$21, (%%rsp)\n\t"
-		// move old bit 21 into %eax
-		"cmovcl	%%ebx, %%eax\n\t"
-		"popfq\n\t"
-		"pushfq\n\t"
-		"btsq	$21, (%%rsp)\n\t"
-		// move new bit 21 into %ecx
-		"cmovcl	%%ebx, %%ecx\n\t"
-		// old in ecx, new in eax
-		"xorl	%%ecx, %%eax\n\t"
-		"movl	%%eax, %0\n\t"
-		"addq	$8, %%rsp\n\t"
+		"btc	$21, %%rax\n\t"
+		"push	%%rax\n\t"
+		"popf\n\t"
+		"pushf\n\t"
+		"pop	%%rax\n\t"
+		// check if bit 21 was toggled
+		"xor	%%rcx, %%rax\n\t"
+		"shr	$20, %%rax\n\t"
 		: "=r" (has)
 	);
 }

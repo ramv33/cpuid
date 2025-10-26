@@ -3,22 +3,21 @@
 	.type	has_cpuid, @function
 # bool has_cpuid(void)
 has_cpuid:
-	xorl	%eax, %eax
-	xorl	%ecx, %ecx
-	movl	$1, %edx
 	pushfq
-	btcq	$21, (%rsp)
-	# Old bit 21=1 in eax
-	cmovcl	%edx, %eax
-	popfq
-	pushfq
-	btsq	$21, (%rsp)
-	# New bit 21 in ecx
-	cmovcl	%edx, %ecx
-	# eax = was bit 21 toggled?
-	xorl	%ecx, %eax
-	addq	$8, %rsp
-	
+	pop	%rax
+	# save original rflags in rcx
+	mov	%rax, %rcx
+	# toggle bit 21 - ID flag
+	btc	$21, %rax
+	push	%rax
+	popf
+	pushf
+	# get new rflags in rax
+	pop	%rax
+	# check if it was modified
+	xor	%rcx, %rax
+	# bit 21 is 1 if it was toggled successfully
+	shr	$20, %rax
 	ret
 
 	.globl	cpuid
