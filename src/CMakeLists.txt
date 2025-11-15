@@ -1,10 +1,5 @@
-# cmake_minimum_required(VERSION 3.23)
-#
-# project(cpuid)
+add_subdirectory(lib)
+add_subdirectory(py)
 
-add_executable(cpuid)
-target_sources(cpuid
-  PRIVATE
-  cpuid.c
-  main.c
-)
+add_executable(cpuid main.c)
+target_link_libraries(cpuid libcpuid)
