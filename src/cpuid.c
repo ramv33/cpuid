@@ -2,6 +2,48 @@
 
 #include "cpuid.h"
 
+void get_amd_proc_id(uint32_t eax, struct processor_identifier *proc_id)
+{
+	unsigned char base_fam = get_base_fam(eax);
+	unsigned char ext_fam = get_base_fam(eax);
+	unsigned char base_model = get_base_model(eax);
+	unsigned char ext_model = get_base_model(eax);
+
+	proc_id->stepping = get_stepping(eax);
+
+	// printf("base_fam=0x%x, ext_fam=0x%x, base_model=0x%x, ext_model=0x%x\n",
+	// 	base_fam, ext_fam, base_model, ext_model);
+	proc_id->family = base_fam;
+	if (base_fam == 0xf)
+		proc_id->family += ext_fam;
+
+	if (base_fam == 0xf)
+		proc_id->model = (ext_model << 4) | base_model;
+	else
+		proc_id->model = base_model;
+}
+
+void get_intel_proc_id(uint32_t eax, struct processor_identifier *proc_id)
+{
+	unsigned char base_fam = get_base_fam(eax);
+	unsigned char ext_fam = get_base_fam(eax);
+	unsigned char base_model = get_base_model(eax);
+	unsigned char ext_model = get_base_model(eax);
+
+	proc_id->stepping = get_stepping(eax);
+
+	// printf("base_fam=0x%x, ext_fam=0x%x, base_model=0x%x, ext_model=0x%x\n",
+	// 	base_fam, ext_fam, base_model, ext_model);
+	proc_id->family = base_fam;
+	if (base_fam == 0xf)
+		proc_id->family += ext_fam;
+
+	// Intel checks for 0x6 which AMD does not
+	if (base_fam == 0xf || base_fam == 0x6)
+		proc_id->model = (ext_model << 4) | base_model;
+	else
+		proc_id->model = base_model;
+}
 
 int has_cpuid(void)
 {
@@ -45,24 +87,33 @@ void dump_features(int32_t reg, const char *feat_array[])
 		printf("\t%s: %c\n", feat_array[i], reg & (1 << i) ? 'Y' : 'N');
 }
 
-void get_cpu_string(char pstr[13])
+/*
+ * parse_vendor_id
+ * 	Parse the 12 byte vendor identification string from registers ebx, ecx, edx
+ *
+ * 	@vendor_id:	char array of size 13 atleast
+ * 	@regs:		regs after calling CPUID.00
+ */
+void parse_vendor_id(char vendor_id[13], struct cpuid_regs *regs)
 {
-	struct cpuid_regs regs;
+	vendor_id[0] = regs->ebx & 0xff;
+	vendor_id[1] = (regs->ebx >> 8) & 0xff;
+	vendor_id[2] = (regs->ebx >> 16) & 0xff;
+	vendor_id[3] = (regs->ebx >> 24) & 0xff;
+	vendor_id[4] = regs->edx & 0xff;
+	vendor_id[5] = (regs->edx >> 8) & 0xff;
+	vendor_id[6] = (regs->edx >> 16) & 0xff;
+	vendor_id[7] = (regs->edx >> 24) & 0xff;
+	vendor_id[8] = regs->ecx & 0xff;
+	vendor_id[9] = (regs->ecx >> 8) & 0xff;
+	vendor_id[10] = (regs->ecx >> 16) & 0xff;
+	vendor_id[11] = (regs->ecx >> 24) & 0xff;
+	vendor_id[12] = '\0';
+}
 
-	regs.eax = 0;
+void get_vendor_id(char vendor_id[13])
+{
+	struct cpuid_regs regs = { .eax = 0, .ebx = 0, .ecx = 0, .edx = 0};
 	cpuid(&regs);
-
-	pstr[0] = regs.ebx & 0xff;
-	pstr[1] = (regs.ebx >> 8) & 0xff;
-	pstr[2] = (regs.ebx >> 16) & 0xff;
-	pstr[3] = (regs.ebx >> 24) & 0xff;
-	pstr[4] = regs.edx & 0xff;
-	pstr[5] = (regs.edx >> 8) & 0xff;
-	pstr[6] = (regs.edx >> 16) & 0xff;
-	pstr[7] = (regs.edx >> 24) & 0xff;
-	pstr[8] = regs.ecx & 0xff;
-	pstr[9] = (regs.ecx >> 8) & 0xff;
-	pstr[10] = (regs.ecx >> 16) & 0xff;
-	pstr[11] = (regs.ecx >> 24) & 0xff;
-	pstr[12] = '\0';
+	parse_vendor_id(vendor_id, &regs);
 }
