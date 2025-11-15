@@ -7,9 +7,10 @@ int has_cpuid(void)
 {
 	int has;
 
-	asm volatile(
+	__asm__ volatile(
 		"pushf\n\t"
 		"pop	%%rax\n\t"
+		// save rflags in rcx
 		"mov	%%rax, %%rcx\n\t"
 		// complement bit 21
 		"btc	$21, %%rax\n\t"
@@ -28,7 +29,7 @@ int has_cpuid(void)
 void cpuid(struct cpuid_regs* regs)
 {
 
-	asm volatile(
+	__asm__ volatile(
 		"cpuid\n\t"
 		// copies the values from regs into the correct registers before and after
 		: "+a" (regs->eax), "+b" (regs->ebx),
