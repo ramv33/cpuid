@@ -2,6 +2,13 @@
 
 #include "cpuid.h"
 
+/*
+ * get_amd_proc_id
+ * 	Extract AMD CPU stepping, family, and model from @eax and store in @proc_id
+ *
+ * 	@eax:		eax register after calling CPUID.01
+ * 	@proc_id:	stepping, family, and model is stored in this struct.
+ */
 void get_amd_proc_id(uint32_t eax, struct processor_identifier *proc_id)
 {
 	unsigned char base_fam = get_base_fam(eax);
@@ -11,8 +18,6 @@ void get_amd_proc_id(uint32_t eax, struct processor_identifier *proc_id)
 
 	proc_id->stepping = get_stepping(eax);
 
-	// printf("base_fam=0x%x, ext_fam=0x%x, base_model=0x%x, ext_model=0x%x\n",
-	// 	base_fam, ext_fam, base_model, ext_model);
 	proc_id->family = base_fam;
 	if (base_fam == 0xf)
 		proc_id->family += ext_fam;
@@ -23,6 +28,13 @@ void get_amd_proc_id(uint32_t eax, struct processor_identifier *proc_id)
 		proc_id->model = base_model;
 }
 
+/*
+ * get_intel_proc_id
+ * 	Extract Intel CPU stepping, family, and model from @eax and store in @proc_id
+ *
+ * 	@eax:		eax register after calling CPUID.01
+ * 	@proc_id:	stepping, family, and model is stored in this struct.
+ */
 void get_intel_proc_id(uint32_t eax, struct processor_identifier *proc_id)
 {
 	unsigned char base_fam = get_base_fam(eax);
@@ -32,8 +44,6 @@ void get_intel_proc_id(uint32_t eax, struct processor_identifier *proc_id)
 
 	proc_id->stepping = get_stepping(eax);
 
-	// printf("base_fam=0x%x, ext_fam=0x%x, base_model=0x%x, ext_model=0x%x\n",
-	// 	base_fam, ext_fam, base_model, ext_model);
 	proc_id->family = base_fam;
 	if (base_fam == 0xf)
 		proc_id->family += ext_fam;
@@ -45,6 +55,10 @@ void get_intel_proc_id(uint32_t eax, struct processor_identifier *proc_id)
 		proc_id->model = base_model;
 }
 
+/*
+ * has_cpuid:
+ *	Returns 0 if processor does not support CPUID, and non-zero otherwise
+ */
 int has_cpuid(void)
 {
 	int has;
@@ -68,6 +82,11 @@ int has_cpuid(void)
 	);
 }
 
+/*
+ * cpuid
+ * 	Call CPUID with values in @regs.
+ * 	@regs is modified to contain the values returned.
+ */
 void cpuid(struct cpuid_regs* regs)
 {
 
@@ -111,6 +130,12 @@ void parse_vendor_id(char vendor_id[13], struct cpuid_regs *regs)
 	vendor_id[12] = '\0';
 }
 
+/*
+ * get_vendor_id
+ * 	Call CPUID.EAX=0 and store the vendor id string in @vendor_id
+ *
+ * 	@vendor_id:	char array of size 13 atleast
+ */
 void get_vendor_id(char vendor_id[13])
 {
 	struct cpuid_regs regs = { .eax = 0, .ebx = 0, .ecx = 0, .edx = 0};
