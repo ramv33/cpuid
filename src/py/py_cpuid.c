@@ -16,8 +16,18 @@ static PyObject *py_cpuid(PyObject *self, PyObject *args)
 	return (PyObject *)obj;
 }
 
+static PyObject *py_get_vendor_id(PyObject *self, PyObject *Py_UNUSED(ignored))
+{
+	char vendor_id[13];
+
+	get_vendor_id(vendor_id);
+
+	return PyUnicode_FromString(vendor_id);
+}
+
 static PyMethodDef cpuid_methods[] = {
 	{"cpuid", py_cpuid, METH_VARARGS, "Run CPUID instruction and return registers"},
+	{"get_vendor_id", py_get_vendor_id, METH_NOARGS, "Get CPU Vendor ID"},
 	{NULL, NULL, 0, NULL},
 };
 
