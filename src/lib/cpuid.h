@@ -5,7 +5,7 @@
 
 #define BIT(x)	(1 << (x))
 
-static const char *g_feat_ecx_intel_01[] = {
+static const char *g_feat_01_intel_ecx[] = {
 	[0] = "SSE3", [1] = "PCLMULQDQ", [2] = "64-bit DS Area", [3] = "MONITOR/MWAIT",
 	[4] = "CPL Qualified Debug Store", [5] = "VM extensions", [6] = "Safer Mode Extensions", [7] = "Enhanced Intel SpeedStep",
 	[8] = "Thermal Monitor 2", [9] = "SSSE3", [10] = "L1 Context ID", [11] = "IA32_DEBUG_INTERFACE MSR for Silicon Debug",
@@ -16,7 +16,7 @@ static const char *g_feat_ecx_intel_01[] = {
 	[28] = "AVX", [29] = "F16C", [30] = "RDRAND", [31] = "UNUSED"
 };
 
-static const char *g_feat_edx_intel_01[] = {
+static const char *g_feat_01_intel_edx[] = {
 	[0] = "FPU", [1] = "VME", [2] = "Debugging Extensions", [3] = "Page Size Extension",
 	[4] = "RDTSC", [5] = "MSR", [6] = "PAE", [7] = "MCE",
 	[8] = "CMPXCHG8B", [9] = "APIC", [10] = "RESERVED", [11] = "SYSENTER/SYSEXIT",
@@ -27,7 +27,7 @@ static const char *g_feat_edx_intel_01[] = {
 	[28] = "Hyper-Threading", [29] = "Thermal Monitor", [30] = "RESERVED", [31] = "Pending Break Enable"
 };
 
-static const char *g_feat_ecx_amd_01[] = {
+static const char *g_feat_01_amd_ecx[] = {
 	[0] = "SSE3", [1] = "PCLMULQDQ", [2] = "RESERVED", [3] = "MONITOR/MWAIT",
 	[4] = "RESERVED", [5] = "RESERVED", [6] = "RESERVED", [7] = "RESERVED",
 	[8] = "RESERVED", [9] = "SSSE3", [10] = "RESERVED", [11] = "RESERVED",
@@ -39,7 +39,7 @@ static const char *g_feat_ecx_amd_01[] = {
 	[28] = "AVX", [29] = "F16C", [30] = "RDRAND", [31] = "UNUSED"
 };
 
-static const char *g_feat_edx_amd_01[] = {
+static const char *g_feat_01_amd_edx[] = {
 	[0] = "FPU", [1] = "VME", [2] = "Debugging Extensions", [3] = "Page Size Extension",
 	[4] = "RDTSC", [5] = "MSR", [6] = "PAE", [7] = "MCE",
 	[8] = "CMPXCHG8B", [9] = "APIC", [10] = "RESERVED", [11] = "SYSENTER/SYSEXIT",

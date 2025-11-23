@@ -87,7 +87,7 @@ int main(void)
 
 	puts("CPUID.EAX=0x1");
 	puts("=============");
-	c01(cpustr, g_feat_ecx_amd_01, g_feat_edx_amd_01);
+	c01(cpustr, g_feat_01_amd_ecx, g_feat_01_amd_edx);
 	puts("CPUID.EAX=0x2");
 	puts("=============");
 	c02();

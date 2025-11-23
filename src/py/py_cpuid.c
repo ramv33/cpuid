@@ -48,6 +48,8 @@ PyMODINIT_FUNC PyInit_cpuid(void)
 	if (!m)
 		return NULL;
 
+	// Add constants from feature_flags
+
 	Py_INCREF(&Py_cpuid_regs_type);
 	PyModule_AddObject(m, "cpuid_regs", (PyObject *)&Py_cpuid_regs_type);
 
