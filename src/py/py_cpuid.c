@@ -74,25 +74,38 @@ static PyObject *make_feature_list(const char *feat_list[32])
 	return list;
 }
 
+
+/* feature list contains the meaning of each bit in registers ecx and edx */
 static void add_feature_list_constants(PyObject *m)
 {
-	PyObject *list = NULL;
+	PyObject *amd = PyModule_New("amd");
+	if (!amd)
+		return;
+	PyObject *intel = PyModule_New("intel");
+	if (!intel)
+		return;
 
+	PyObject *list = NULL;
+	// Create list for each register under a leaf
 	list = make_feature_list(g_feat_01_intel_ecx);
+	// Add to vendor namespace
 	if (list)
-		PyModule_AddObject(m, "feat_01_intel_ecx", list);
+		PyModule_AddObject(intel, "_01_ecx", list);
 
 	list = make_feature_list(g_feat_01_intel_edx);
 	if (list)
-		PyModule_AddObject(m, "feat_01_intel_edx", list);
+		PyModule_AddObject(intel, "_01_edx", list);
 
 	list = make_feature_list(g_feat_01_amd_ecx);
 	if (list)
-		PyModule_AddObject(m, "feat_01_amd_ecx", list);
+		PyModule_AddObject(amd, "_01_ecx", list);
 
 	list = make_feature_list(g_feat_01_amd_edx);
 	if (list)
-		PyModule_AddObject(m, "feat_01_amd_edx", list);
+		PyModule_AddObject(amd, "_01_edx", list);
+
+	PyModule_AddObject(m, "intel", intel);
+	PyModule_AddObject(m, "amd", amd);
 }
 
 PyMODINIT_FUNC PyInit_cpuid(void)
@@ -104,7 +117,12 @@ PyMODINIT_FUNC PyInit_cpuid(void)
 	if (!m)
 		return NULL;
 
-	add_feature_list_constants(m);
+	// Create namesapce for constants
+	PyObject *feat_lists = PyModule_New("feature_lists");
+	if (!feat_lists)
+		return NULL;
+	PyModule_AddObject(m, "feature_lists", feat_lists);
+	add_feature_list_constants(feat_lists);
 
 	Py_INCREF(&Py_cpuid_regs_type);
 	PyModule_AddObject(m, "cpuid_regs", (PyObject *)&Py_cpuid_regs_type);
