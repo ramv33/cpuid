@@ -39,6 +39,45 @@ static struct PyModuleDef cpuid_module = {
 	cpuid_methods
 };
 
+static PyObject *make_feature_list(const char *feat_list[32])
+{
+	PyObject *list = PyList_New(32);
+	if (!list)
+		return NULL;
+
+	for (int i = 0; i < 32; i++) {
+		PyObject *str = PyUnicode_FromString(feat_list[i]);
+		if (!str) {
+			Py_DECREF(list);
+			return NULL;
+		}
+		PyList_SetItem(list, i, str);
+	}
+
+	return list;
+}
+
+static void add_feature_list_constants(PyObject *m)
+{
+	PyObject *list = NULL;
+
+	list = make_feature_list(g_feat_01_intel_ecx);
+	if (list)
+		PyModule_AddObject(m, "feat_01_intel_ecx", list);
+
+	list = make_feature_list(g_feat_01_intel_edx);
+	if (list)
+		PyModule_AddObject(m, "feat_01_intel_edx", list);
+
+	list = make_feature_list(g_feat_01_amd_ecx);
+	if (list)
+		PyModule_AddObject(m, "feat_01_amd_ecx", list);
+
+	list = make_feature_list(g_feat_01_amd_edx);
+	if (list)
+		PyModule_AddObject(m, "feat_01_amd_edx", list);
+}
+
 PyMODINIT_FUNC PyInit_cpuid(void)
 {
 	if (PyType_Ready(&Py_cpuid_regs_type) < 0)
@@ -48,7 +87,7 @@ PyMODINIT_FUNC PyInit_cpuid(void)
 	if (!m)
 		return NULL;
 
-	// Add constants from feature_flags
+	add_feature_list_constants(m);
 
 	Py_INCREF(&Py_cpuid_regs_type);
 	PyModule_AddObject(m, "cpuid_regs", (PyObject *)&Py_cpuid_regs_type);
