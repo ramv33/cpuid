@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "cpuid.h"
 
@@ -141,4 +142,15 @@ void get_vendor_id(char vendor_id[13])
 	struct cpuid_regs regs = { .eax = 0, .ebx = 0, .ecx = 0, .edx = 0};
 	cpuid(&regs);
 	parse_vendor_id(vendor_id, &regs);
+}
+
+void get_processor_info(struct processor_identifier *proc_id, struct cpuid_regs *regs)
+{
+	char vendor_id[13] = "";
+
+	get_vendor_id(vendor_id);
+	if (!strcmp(vendor_id, "AuthenticAMD"))
+		get_amd_proc_id(regs->eax, proc_id);
+	else if (!strcmp(vendor_id, "GenuineIntel"))
+		get_intel_proc_id(regs->eax, proc_id);
 }

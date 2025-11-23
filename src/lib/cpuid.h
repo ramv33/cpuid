@@ -72,6 +72,7 @@ void parse_vendor_id(char vendor_id[13], struct cpuid_regs *regs);
 // Get Processor Identifier bits from CPUID.1.EAX
 void get_amd_proc_id(uint32_t eax, struct processor_identifier *proc_id);
 void get_intel_proc_id(uint32_t eax, struct processor_identifier *proc_id);
+void get_processor_info(struct processor_identifier *proc_id, struct cpuid_regs *regs);
 
 static inline unsigned char get_stepping(uint32_t eax)
 {

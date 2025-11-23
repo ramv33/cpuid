@@ -31,10 +31,7 @@ void c01(const char cpustr[13], const char *feature_ecx[], const char *feature_e
 	cpuid(&regs);
 
 	struct processor_identifier proc_id;
-	if (!strcmp(cpustr, "AuthenticAMD"))
-		get_amd_proc_id(regs.eax, &proc_id); 
-	else if (!strcmp(cpustr, "GenuineIntel"))
-		get_intel_proc_id(regs.eax, &proc_id);
+	get_processor_info(&proc_id, &regs);
 
 	printf("\tFamily: %02x\n", proc_id.family);
 	printf("\tModel: %02x\n", proc_id.model);
