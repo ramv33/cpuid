@@ -25,9 +25,26 @@ static PyObject *py_get_vendor_id(PyObject *self, PyObject *Py_UNUSED(ignored))
 	return PyUnicode_FromString(vendor_id);
 }
 
+static PyObject *py_get_processor_info(PyObject *self, PyObject *Py_UNUSED(ignored))
+{
+	struct processor_identifier proc_id;
+
+	get_processor_info(&proc_id, NULL);
+	PyObject *dict = PyDict_New();
+	if (!dict)
+		return NULL;
+
+	PyDict_SetItemString(dict, "family", PyLong_FromLong(proc_id.family));
+	PyDict_SetItemString(dict, "model", PyLong_FromLong(proc_id.model));
+	PyDict_SetItemString(dict, "stepping", PyLong_FromLong(proc_id.stepping));
+
+	return dict;
+}
+
 static PyMethodDef cpuid_methods[] = {
 	{"cpuid", py_cpuid, METH_VARARGS, "Run CPUID instruction and return registers"},
 	{"get_vendor_id", py_get_vendor_id, METH_NOARGS, "Get CPU Vendor ID"},
+	{"get_processor_info", py_get_processor_info, METH_NOARGS, "Return cpu model, family, and stepping"},
 	{NULL, NULL, 0, NULL},
 };
 
