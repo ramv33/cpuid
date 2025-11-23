@@ -162,8 +162,8 @@ void get_processor_info(struct processor_identifier *proc_id, struct cpuid_regs 
 	}
 
 	get_vendor_id(vendor_id);
-	if (!strcmp(vendor_id, "AuthenticAMD"))
+	if (!strcmp(vendor_id, VENDOR_STRING_AMD))
 		get_amd_proc_id(regs->eax, proc_id);
-	else if (!strcmp(vendor_id, "GenuineIntel"))
+	else if (!strcmp(vendor_id, VENDOR_STRING_INTEL))
 		get_intel_proc_id(regs->eax, proc_id);
 }

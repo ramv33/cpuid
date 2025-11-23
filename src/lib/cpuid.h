@@ -4,6 +4,8 @@
 #include <stdint.h>
 
 #define BIT(x)	(1 << (x))
+#define VENDOR_STRING_INTEL	"GenuineIntel"
+#define VENDOR_STRING_AMD	"AuthenticAMD"
 
 static const char *g_feat_01_intel_ecx[] = {
 	[0] = "SSE3", [1] = "PCLMULQDQ", [2] = "64-bit DS Area", [3] = "MONITOR/MWAIT",
