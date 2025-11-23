@@ -144,9 +144,22 @@ void get_vendor_id(char vendor_id[13])
 	parse_vendor_id(vendor_id, &regs);
 }
 
+/*
+ * get_processor_info
+ * 	Set proc_id
+ * 	If @regs is not NULL, value from regs->eax is used. Otherwise, cpuid is called.
+ */
 void get_processor_info(struct processor_identifier *proc_id, struct cpuid_regs *regs)
 {
 	char vendor_id[13] = "";
+	struct cpuid_regs r;
+
+	if (!regs) {
+		r.eax = 1;
+		r.ebx = r.ecx = r.edx = 0;
+		cpuid(&r);
+		regs = &r;
+	}
 
 	get_vendor_id(vendor_id);
 	if (!strcmp(vendor_id, "AuthenticAMD"))
