@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <arpa/inet.h>
+#include <assert.h>
 
 #include "cpuid.h"
 
@@ -54,18 +54,67 @@ void c01(const char cpustr[13], const char *feature_ecx[], const char *feature_e
 	show_features(regs.edx, feature_edx);
 }
 
-// Reserved on AMD...
-void c02()
+void dump_descriptor_02(uint32_t reg, const char *feat_descriptor[])
+{
+	// register does not contain valid descriptors
+	if (reg & 0x80000000)
+		return;
+
+	unsigned char b1 = ((reg & 0xff) >> 24);
+	unsigned char b2 = ((reg & 0xff) >> 16);
+	unsigned char b3 = ((reg & 0xff) >> 8);
+	unsigned char b4 = reg & 0xff;
+	
+	printf("%s", feat_descriptor[b1] ? feat_descriptor[b1] : "");
+	printf("%s", feat_descriptor[b2] ? feat_descriptor[b2] : "");
+	printf("%s", feat_descriptor[b3] ? feat_descriptor[b3] : "");
+	printf("%s", feat_descriptor[b4] ? feat_descriptor[b4] : "");
+}
+
+/* TLB, cache, prefetch hardware info */
+void c02_intel()
 {
 	struct cpuid_regs regs;
 
 	regs.eax = 2;
 	regs.ebx = regs.ecx = regs.edx = 0;
+	cpuid(&regs);
 
 	// AL is always 0x01
+	assert((regs.eax & 0xff) == 0x01);
+
 	// If msb of register is 0, it contains valid info; otherwise it is reserved.
 	// If valid, each byte of the register contains 1 byte descriptors.
 	// The descriptors are described in Table-3.21
+	dump_descriptor_02(regs.eax, g_feat_02_intel_descriptors);
+	dump_descriptor_02(regs.ebx, g_feat_02_intel_descriptors);
+	dump_descriptor_02(regs.ecx, g_feat_02_intel_descriptors);
+	dump_descriptor_02(regs.edx, g_feat_02_intel_descriptors);
+}
+
+void c02_amd()
+{
+	/* Reserved */
+	return;
+}
+
+/*
+ * Leaf 0x02
+ * AMD: Reserved
+ * Intel: TLB, cache, prefetch hardware info.
+ */
+void c02()
+{
+	char vendor_id[13];
+
+	get_vendor_id(vendor_id);
+	if (!strcmp(vendor_id, VENDOR_STRING_INTEL)) {
+		puts("CPUID.EAX=0x2");
+		puts("=============");
+		c02_intel();
+	} else if (!strcmp(vendor_id, VENDOR_STRING_AMD)) {
+		puts("CPUID.EAX=0x2 is not supported on AMD!");
+	}
 }
 
 int main(void)
@@ -85,8 +134,8 @@ int main(void)
 	puts("CPUID.EAX=0x1");
 	puts("=============");
 	c01(cpustr, g_feat_01_amd_ecx, g_feat_01_amd_edx);
-	puts("CPUID.EAX=0x2");
-	puts("=============");
+
+	// Reserved on AMD
 	c02();
 
 	return 0;
