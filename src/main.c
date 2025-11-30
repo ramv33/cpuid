@@ -49,9 +49,9 @@ void c01(const char cpustr[13], const char *feature_ecx[], const char *feature_e
 	printf("\tInitial APIC ID: 0x%08x\n", regs.ebx & 0xff);
 
 	puts("\n\t--- Features in ECX ---");
-	dump_features(regs.ecx, feature_ecx);
+	show_features(regs.ecx, feature_ecx);
 	puts("\n\t--- Features in EDX ---");
-	dump_features(regs.edx, feature_edx);
+	show_features(regs.edx, feature_edx);
 }
 
 // Reserved on AMD...

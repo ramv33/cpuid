@@ -67,7 +67,8 @@ struct processor_identifier {
 
 int has_cpuid(void);
 void cpuid(struct cpuid_regs *regs);
-void dump_features(int32_t reg, const char *feat_array[]);
+void show_features(int32_t reg, const char *feat_array[]);
+void dump_all_features(int32_t reg, const char *feat_array[]);
 void get_vendor_id(char pstr[13]);
 void parse_vendor_id(char vendor_id[13], struct cpuid_regs *regs);
 

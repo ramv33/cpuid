@@ -107,6 +107,16 @@ void dump_features(int32_t reg, const char *feat_array[])
 		printf("\t%s: %c\n", feat_array[i], reg & (1 << i) ? 'Y' : 'N');
 }
 
+void show_features(int32_t reg, const char *feat_array[])
+{
+	for (int i = 0; i < 31; i++) {
+		if (reg & (1 << i))
+			printf("%s, ", feat_array[i]);
+	}
+
+	putchar('\n');
+}
+
 /*
  * parse_vendor_id
  * 	Parse the 12 byte vendor identification string from registers ebx, ecx, edx
