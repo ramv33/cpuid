@@ -1,123 +1,23 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <getopt.h>
 
+#include "dump.h"
 #include "cpuid.h"
 
-void c00(char *cpu_str, size_t size)
-{
-	struct cpuid_regs regs;
-	char pstr[13];
+struct settings {
+	// valid if not -1
+	int64_t	eax;
+	int64_t	ecx;
+	bool	dump;
+	bool	dump_all;
+};
 
-	regs.eax = regs.ebx = regs.ecx = regs.edx = 0;
-	cpuid(&regs);
+void parse_args(struct settings *s, int argc, char *argv[]);
 
-	parse_vendor_id(pstr, &regs);
-	if (cpu_str && size) {
-		strncpy(cpu_str, pstr, size);
-		cpu_str[size-1] = '\0';
-	}
-
-	printf("\tProcessor Identifier String: %s\n", pstr);
-	printf("\tHighest supported function: 0x%08x\n", regs.eax);
-}
-
-void c01(const char cpustr[13], const char *feature_ecx[], const char *feature_edx[])
-{
-	struct cpuid_regs regs;
-
-	regs.eax = 1;
-	regs.ebx = regs.ecx = regs.edx = 0;
-	cpuid(&regs);
-
-	struct processor_identifier proc_id;
-	get_processor_info(&proc_id, &regs);
-
-	printf("\tFamily: %02x\n", proc_id.family);
-	printf("\tModel: %02x\n", proc_id.model);
-	printf("\tStepping: %02x\n", proc_id.stepping);
-
-	printf("\tBrand Index: 0x%08x\n", regs.ebx & 0xff);
-	regs.ebx >>= 8;
-	printf("\tCLFLUSH Line Size: %d\n", regs.ebx & 0xff);
-	printf("\tCache Line Size: %d\n", (regs.ebx & 0xff) * 8);
-	regs.ebx >>= 8;
-	// reserved if EDX[28] is 0
-	if (regs.edx & (1 << 28))
-		printf("\tMax number of addressable IDs for logical processors: %d\n", regs.ebx & 0xff);
-	regs.ebx >>= 8;
-	printf("\tInitial APIC ID: 0x%08x\n", regs.ebx & 0xff);
-
-	puts("\n\t--- Features in ECX ---");
-	show_features(regs.ecx, feature_ecx);
-	puts("\n\t--- Features in EDX ---");
-	show_features(regs.edx, feature_edx);
-}
-
-void dump_descriptor_02(uint32_t reg, const char *feat_descriptor[])
-{
-	// register does not contain valid descriptors
-	if (reg & 0x80000000)
-		return;
-
-	unsigned char b1 = ((reg & 0xff) >> 24);
-	unsigned char b2 = ((reg & 0xff) >> 16);
-	unsigned char b3 = ((reg & 0xff) >> 8);
-	unsigned char b4 = reg & 0xff;
-	
-	printf("%s", feat_descriptor[b1] ? feat_descriptor[b1] : "");
-	printf("%s", feat_descriptor[b2] ? feat_descriptor[b2] : "");
-	printf("%s", feat_descriptor[b3] ? feat_descriptor[b3] : "");
-	printf("%s", feat_descriptor[b4] ? feat_descriptor[b4] : "");
-}
-
-/* TLB, cache, prefetch hardware info */
-void c02_intel()
-{
-	struct cpuid_regs regs;
-
-	regs.eax = 2;
-	regs.ebx = regs.ecx = regs.edx = 0;
-	cpuid(&regs);
-
-	// AL is always 0x01
-	assert((regs.eax & 0xff) == 0x01);
-
-	// If msb of register is 0, it contains valid info; otherwise it is reserved.
-	// If valid, each byte of the register contains 1 byte descriptors.
-	// The descriptors are described in Table-3.21
-	dump_descriptor_02(regs.eax, g_feat_02_intel_descriptors);
-	dump_descriptor_02(regs.ebx, g_feat_02_intel_descriptors);
-	dump_descriptor_02(regs.ecx, g_feat_02_intel_descriptors);
-	dump_descriptor_02(regs.edx, g_feat_02_intel_descriptors);
-}
-
-void c02_amd()
-{
-	/* Reserved */
-	return;
-}
-
-/*
- * Leaf 0x02
- * AMD: Reserved
- * Intel: TLB, cache, prefetch hardware info.
- */
-void c02()
-{
-	char vendor_id[13];
-
-	get_vendor_id(vendor_id);
-	if (!strcmp(vendor_id, VENDOR_STRING_INTEL)) {
-		puts("CPUID.EAX=0x2");
-		puts("=============");
-		c02_intel();
-	} else if (!strcmp(vendor_id, VENDOR_STRING_AMD)) {
-		puts("CPUID.EAX=0x2 is not supported on AMD!");
-	}
-}
-
-int main(void)
+int main(int argc, char *argv[])
 {
 	struct cpuid_regs regs;
 	char cpustr[13];
@@ -127,16 +27,103 @@ int main(void)
 		return 1;
 	}
 
-	puts("CPUID.EAX=0x0");
-	puts("=============");
-	c00(cpustr, sizeof(cpustr));
+	struct settings s;
+	parse_args(&s, argc, argv);
 
-	puts("CPUID.EAX=0x1");
-	puts("=============");
-	c01(cpustr, g_feat_01_amd_ecx, g_feat_01_amd_edx);
+	// dump everythin if --dump-all passed or if eax and ecx were unspecified
+	if (s.dump_all || ((s.eax == -1) && (s.ecx == -1))) {
+		puts("CPUID.EAX=0x0");
+		puts("=============");
+		c00(cpustr, sizeof(cpustr));
 
-	// Reserved on AMD
-	c02();
+		puts("CPUID.EAX=0x1");
+		puts("=============");
+		c01(cpustr, g_feat_01_amd_ecx, g_feat_01_amd_edx);
+
+		// Reserved on AMD
+		c02();
+
+		return 0;
+	}
+
+	// if not dumping everything and eax, ecx are uninitialized, set them to 0
+	if (s.eax == -1)
+		s.eax = 0;
+	if (s.ecx == -1)
+		s.ecx = 0;
+
+	regs.eax = s.eax;
+	regs.ecx = s.ecx;
+
+	printf("CPUID(EAX=%08x,ECX=%08x)\n", regs.eax, regs.ecx);
+	cpuid(&regs);
+	printf("EAX=%08x, EBX=%08x, ECX=%08x, EDX=%08x\n",
+		regs.eax, regs.ebx, regs.ecx, regs.edx);
 
 	return 0;
+}
+
+void usage()
+{
+	puts("cpuid usage:");
+	printf("\t--eax eax_value\n");
+	printf("\t--ecx ecx_value\n");
+	printf("\t-d interpret register values and display information\n");
+	printf("\t\tWithout -d, the raw register values are displayed\n");
+	printf("\t--dump-all display all information about cpu (not everything is supported)\n");
+	printf("\t--help display this help\n");
+	exit(0);
+}
+
+void parse_args(struct settings *s, int argc, char *argv[])
+{
+	const int eax_index = 0;
+	const int ecx_index = 1;
+	static struct option long_options[] = {
+		{"eax", required_argument, 0, 0},
+		{"ecx", required_argument, 0, 0},
+		{"dump-all", no_argument, 0, 0},
+		{"help", no_argument, 0, 'h'},
+		{0, 0, 0, 0}
+	};
+
+
+	s->eax = s->ecx = -1;
+	s->dump = false;
+	while (true) {
+		int option_index = 0;
+		int c = getopt_long(argc, argv, "dh", long_options, &option_index);
+
+		if (c == -1)
+			break;
+
+		switch (c) {
+		case 0:
+			if (optarg) {
+				uint32_t val = strtoul(optarg, NULL, 0);
+				switch (option_index) {
+				case 0:
+					s->eax = val;
+					break;
+				case 1:
+					s->ecx = val;
+					break;
+				}
+			} else {
+				/* dump_info */
+				if (option_index == 2)
+					s->dump_all = true;
+			}
+			break;
+		case 'd':
+			s->dump = true;
+			break;
+		case 'h':
+			usage();
+			// does not return
+			break;
+		case '?':
+			break;
+		}
+	}
 }

@@ -1,7 +1,7 @@
 add_subdirectory(lib)
 add_subdirectory(py)
 
-add_executable(cpuid main.c)
+add_executable(cpuid main.c dump.c)
 target_link_libraries(cpuid libcpuid)
 
 set_target_properties(cpuid
