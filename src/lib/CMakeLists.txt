@@ -1,5 +1,5 @@
 add_library(libcpuid
-	SHARED
+	STATIC
 	cpuid.c
 )
 
