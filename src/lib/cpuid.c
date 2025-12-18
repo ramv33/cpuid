@@ -144,14 +144,17 @@ void parse_vendor_id(char vendor_id[13], struct cpuid_regs *regs)
 /*
  * get_vendor_id
  * 	Call CPUID.EAX=0 and store the vendor id string in @vendor_id
+ * 	Return a pointer to the argument
  *
  * 	@vendor_id:	char array of size 13 atleast
  */
-void get_vendor_id(char vendor_id[13])
+char *get_vendor_id(char vendor_id[13])
 {
 	struct cpuid_regs regs = { .eax = 0, .ebx = 0, .ecx = 0, .edx = 0};
 	cpuid(&regs);
 	parse_vendor_id(vendor_id, &regs);
+
+	return vendor_id;
 }
 
 /*
