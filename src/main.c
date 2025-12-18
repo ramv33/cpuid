@@ -27,6 +27,12 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	if (argc == 1) {
+		printf("%s\n", get_vendor_id(cpustr));
+		puts("\nRun with -h or --help for usage information");
+		return 0;
+	}
+
 	struct settings s;
 	parse_args(&s, argc, argv);
 
