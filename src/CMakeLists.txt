@@ -7,3 +7,5 @@ target_link_libraries(cpuid libcpuid)
 set_target_properties(cpuid
 	PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+INSTALL(TARGETS cpuid DESTINATION bin)
