@@ -11,3 +11,9 @@ target_include_directories(py_cpuid PRIVATE ${Python3_INCLUDE_DIRS})
 
 target_link_libraries(py_cpuid PRIVATE Python3::Python)
 target_link_libraries(py_cpuid PRIVATE libcpuid)
+
+if (DEFINED SKBUILD_PLATLIB_DIR)
+	install(TARGETS py_cpuid
+		LIBRARY DESTINATION ${SKBUILD_PLATLIB_DIR}
+	)
+endif()
