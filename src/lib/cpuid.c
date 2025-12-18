@@ -126,18 +126,9 @@ void show_features(int32_t reg, const char *feat_array[])
  */
 void parse_vendor_id(char vendor_id[13], struct cpuid_regs *regs)
 {
-	vendor_id[0] = regs->ebx & 0xff;
-	vendor_id[1] = (regs->ebx >> 8) & 0xff;
-	vendor_id[2] = (regs->ebx >> 16) & 0xff;
-	vendor_id[3] = (regs->ebx >> 24) & 0xff;
-	vendor_id[4] = regs->edx & 0xff;
-	vendor_id[5] = (regs->edx >> 8) & 0xff;
-	vendor_id[6] = (regs->edx >> 16) & 0xff;
-	vendor_id[7] = (regs->edx >> 24) & 0xff;
-	vendor_id[8] = regs->ecx & 0xff;
-	vendor_id[9] = (regs->ecx >> 8) & 0xff;
-	vendor_id[10] = (regs->ecx >> 16) & 0xff;
-	vendor_id[11] = (regs->ecx >> 24) & 0xff;
+	memcpy(vendor_id, &regs->ebx, 4);
+	memcpy(vendor_id+4, &regs->edx, 4);
+	memcpy(vendor_id+8, &regs->ecx, 4);
 	vendor_id[12] = '\0';
 }
 
