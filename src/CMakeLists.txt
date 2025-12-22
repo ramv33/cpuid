@@ -1,7 +1,13 @@
 add_subdirectory(lib)
 add_subdirectory(py)
 
-add_executable(cpuid main.c dump.c)
+set(SOURCE_FILES
+	main.c
+	dump.c
+	dump_intel.c
+	dump_amd.c
+)
+add_executable(cpuid ${SOURCE_FILES})
 target_link_libraries(cpuid libcpuid)
 
 set_target_properties(cpuid

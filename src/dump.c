@@ -6,12 +6,6 @@
 #include "dump.h"
 #include "cpuid.h"
 
-// eax, ecx is assumed to be passed in @regs
-void dump_leaf(const struct cpuid_regs *regs)
-{
-	// call c00, c01, etc.
-}
-
 void c00(char *cpu_str, size_t size)
 {
 	struct cpuid_regs regs;
@@ -77,43 +71,6 @@ void dump_descriptor_02(uint32_t reg, const char *feat_descriptor[])
 	printf("%s", feat_descriptor[b2] ? feat_descriptor[b2] : "");
 	printf("%s", feat_descriptor[b3] ? feat_descriptor[b3] : "");
 	printf("%s", feat_descriptor[b4] ? feat_descriptor[b4] : "");
-}
-
-/* TLB, cache, prefetch hardware info */
-void c02_intel()
-{
-	struct cpuid_regs regs;
-
-	regs.eax = 2;
-	regs.ebx = regs.ecx = regs.edx = 0;
-	cpuid(&regs);
-
-	// AL is always 0x01
-	assert((regs.eax & 0xff) == 0x01);
-
-	// If msb of register is 0, it contains valid info; otherwise it is reserved.
-	// If valid, each byte of the register contains 1 byte descriptors.
-	// The descriptors are described in Table-3.21
-	dump_descriptor_02(regs.eax, g_feat_02_intel_descriptors);
-	dump_descriptor_02(regs.ebx, g_feat_02_intel_descriptors);
-	dump_descriptor_02(regs.ecx, g_feat_02_intel_descriptors);
-	dump_descriptor_02(regs.edx, g_feat_02_intel_descriptors);
-}
-
-/* Functions 0x2 - 0x4 are reserved on AMD */
-void c02_amd()
-{
-	return;
-}
-
-void c03_amd()
-{
-	return;
-}
-
-void c04_amd()
-{
-	return;
 }
 
 /*
