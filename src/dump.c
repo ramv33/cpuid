@@ -100,9 +100,19 @@ void c02_intel()
 	dump_descriptor_02(regs.edx, g_feat_02_intel_descriptors);
 }
 
+/* Functions 0x2 - 0x4 are reserved on AMD */
 void c02_amd()
 {
-	/* Reserved */
+	return;
+}
+
+void c03_amd()
+{
+	return;
+}
+
+void c04_amd()
+{
 	return;
 }
 
